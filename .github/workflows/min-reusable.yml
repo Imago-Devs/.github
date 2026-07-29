@@ -10,10 +10,6 @@ on:
         default: "poolside/laguna-s-2.1:free,meta-llama/llama-3.1-8b-instruct:free"
         required: false
 
-concurrency:
-  group: ai-review-${{ github.event.pull_request.number || github.event.issue.number }}-${{ github.event_name }}
-  cancel-in-progress: true
-
 jobs:
   hello:
     runs-on: ubuntu-latest
