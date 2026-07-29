@@ -136,15 +136,10 @@ async function triageIssue() {
   await upsertComment(issue.number, "<!-- ai-review:issue -->", `### 🤖 AI Triage (${model})\n\n${content}`);
 }
 
-try {
-  if (GITHUB_EVENT_NAME === "pull_request" || GITHUB_EVENT_NAME === "pull_request_target") {
-    await reviewPR();
-  } else if (GITHUB_EVENT_NAME === "issues") {
-    await triageIssue();
-  } else {
-    console.error(`Unsupported event: ${GITHUB_EVENT_NAME}`);
-  }
-} catch (err) {
-  console.error("AI review failed:", err);
-  process.exitCode = 0; // never fail the caller repo's checks
+if (GITHUB_EVENT_NAME === "pull_request" || GITHUB_EVENT_NAME === "pull_request_target") {
+  await reviewPR();
+} else if (GITHUB_EVENT_NAME === "issues") {
+  await triageIssue();
+} else {
+  throw new Error(`Unsupported event: ${GITHUB_EVENT_NAME}`);
 }
