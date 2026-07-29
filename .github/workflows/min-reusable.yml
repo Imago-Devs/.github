@@ -1,8 +1,26 @@
 name: Min Reusable
 on:
   workflow_call:
+    secrets:
+      OPENROUTER_API_KEY:
+        required: true
+    inputs:
+      models:
+        type: string
+        default: "poolside/laguna-s-2.1:free,meta-llama/llama-3.1-8b-instruct:free"
+        required: false
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || github.event.issue.number }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 jobs:
   hello:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
-      - run: echo "hello from reusable"
+      - run: echo "hello, model=${{ inputs.models }}, secret set=${{ secrets.OPENROUTER_API_KEY != '' }}"
