@@ -1,0 +1,42 @@
+name: AI Review (reusable)
+
+on:
+  workflow_call:
+    secrets:
+      OPENROUTER_API_KEY:
+        required: true
+    inputs:
+      models:
+        type: string
+        default: "poolside/laguna-s-2.1:free,meta-llama/llama-3.1-8b-instruct:free"
+        required: false
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || github.event.issue.number }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout shared scripts
+        uses: actions/checkout@v4
+        with:
+          repository: Imago-Devs/.github
+          path: .ai-review
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run AI review/triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODELS: ${{ inputs.models }}
+        run: node .ai-review/scripts/ai-review.mjs
